@@ -1,141 +1,113 @@
-// Inisialisasi Canvas
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-canvas.width = 300;
-canvas.height = 500;
+const gameArea = document.getElementById("gameArea");
+const playerCar = document.getElementById("playerCar");
+const scoreDisplay = document.getElementById("score");
+const highScoreDisplay = document.getElementById("highScore");
 
-// Variabel Game
-let car = { x: 125, y: 400, width: 50, height: 80, speed: 10 };
+let playerPosition = 1; // 0 = kiri, 1 = tengah, 2 = kanan
 let obstacles = [];
-let roadLines = [];
-let gameRunning = true;
 let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
 
-// Buat Garis Jalan
-for (let i = 0; i < 10; i++) {
-    roadLines.push({ x: 145, y: i * 50, width: 10, height: 30 });
+// Fungsi untuk membuat rintangan
+function createObstacle() {
+    const obstacle = document.createElement("div");
+    obstacle.classList.add("obstacle");
+
+    // Posisi rintangan: kiri, tengah, atau kanan secara acak
+    const randomPosition = Math.floor(Math.random() * 3); // 0, 1, atau 2
+    obstacle.style.left = `${randomPosition * 33.3}%`;
+    
+    gameArea.appendChild(obstacle);
+    obstacles.push(obstacle);
 }
 
-// Kontrol Keyboard
-document.addEventListener("keydown", function (event) {
-    if (event.key === "ArrowLeft" && car.x > 50) car.x -= car.speed;
-    if (event.key === "ArrowRight" && car.x < 200) car.x += car.speed;
-});
+// Fungsi untuk menggerakkan rintangan ke bawah
+function moveObstacles() {
+    for (let i = 0; i < obstacles.length; i++) {
+        let obstacle = obstacles[i];
+        let obstacleTop = parseInt(window.getComputedStyle(obstacle).top);
 
-// Kontrol Tombol Virtual
-document.getElementById("leftBtn").addEventListener("click", () => {
-    if (car.x > 50) car.x -= car.speed;
-});
+        if (obstacleTop >= 400) {
+            obstacle.remove();
+            obstacles.splice(i, 1);
+            i--;
 
-document.getElementById("rightBtn").addEventListener("click", () => {
-    if (car.x < 200) car.x += car.speed;
-});
-
-// Tambah Rintangan (Mobil Lawan)
-function spawnObstacle() {
-    let positions = [75, 125, 175]; // Mobil bisa muncul di kiri, tengah, atau kanan
-    let obstacleX = positions[Math.floor(Math.random() * positions.length)];
-    obstacles.push({ x: obstacleX, y: -100, width: 50, height: 80, speed: 5 });
+            // Tambah skor jika berhasil melewati rintangan
+            score++;
+            scoreDisplay.innerText = `Score: ${score}`;
+            
+            // Update high score jika perlu
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem("highScore", highScore);
+                highScoreDisplay.innerText = `High Score: ${highScore}`;
+            }
+        } else {
+            obstacle.style.top = `${obstacleTop + 5}px`;
+        }
+    }
 }
-setInterval(spawnObstacle, 2000); // Muncul setiap 2 detik
 
-// Fungsi Update Game
-function updateGame() {
-    if (!gameRunning) return;
+// Fungsi untuk memeriksa tabrakan
+function checkCollision() {
+    const playerRect = playerCar.getBoundingClientRect();
 
-    // Tambah Score
-    score += 1;
+    for (let obstacle of obstacles) {
+        const obstacleRect = obstacle.getBoundingClientRect();
 
-    // Update High Score
-    if (score > highScore) {
-        highScore = score;
-        localStorage.setItem("highScore", highScore);
+        if (
+            playerRect.left < obstacleRect.right &&
+            playerRect.right > obstacleRect.left &&
+            playerRect.top < obstacleRect.bottom &&
+            playerRect.bottom > obstacleRect.top
+        ) {
+            gameOver();
+        }
+    }
+}
+
+// Fungsi saat game over
+function gameOver() {
+    alert(`Lu dah kalah, refresh kalo mau nantang game ini lagi PUH CUPUH!!!\n\nGame Over! Skor: ${score}\nHigh Score: ${highScore}`);
+    location.reload();
+}
+
+// Fungsi untuk menggerakkan mobil pemain ke kiri atau kanan
+function movePlayer(direction) {
+    if (direction === "left" && playerPosition > 0) {
+        playerPosition--;
+    } else if (direction === "right" && playerPosition < 2) {
+        playerPosition++;
+    }
+    playerCar.style.left = `${playerPosition * 33.3}%`;
+}
+
+// Event listener untuk tombol kiri dan kanan di mobile
+document.getElementById("leftButton").addEventListener("click", () => movePlayer("left"));
+document.getElementById("rightButton").addEventListener("click", () => movePlayer("right"));
+
+// Event listener untuk keyboard
+document.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") {
+        movePlayer("left");
+    } else if (event.key === "ArrowRight") {
+        movePlayer("right");
+    }
+});
+
+// Loop utama game
+function gameLoop() {
+    moveObstacles();
+    checkCollision();
+    
+    if (Math.random() < 0.02) {
+        createObstacle();
     }
 
-    // Gerakkan Garis Jalan
-    roadLines.forEach(line => {
-        line.y += 5;
-        if (line.y > canvas.height) line.y = -30;
-    });
-
-    // Gerakkan Rintangan
-    obstacles.forEach((obs, index) => {
-        obs.y += obs.speed;
-        if (obs.y > canvas.height) obstacles.splice(index, 1);
-
-        // Cek tabrakan
-        if (
-            car.x < obs.x + obs.width &&
-            car.x + car.width > obs.x &&
-            car.y < obs.y + obs.height &&
-            car.y + car.height > obs.y
-        ) {
-            gameRunning = false;
-            alert(`Game Over! Skor: ${score}\nHigh Score: ${highScore}\nRefresh untuk bermain lagi.`);
-        }
-    });
-}
-
-// Fungsi Gambar
-function drawGame() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Gambar Jalan
-    ctx.fillStyle = "black";
-    ctx.fillRect(50, 0, 200, canvas.height);
-
-    // Gambar Garis Jalan
-    ctx.fillStyle = "white";
-    roadLines.forEach(line => {
-        ctx.fillRect(line.x, line.y, line.width, line.height);
-    });
-
-    // Gambar Mobil (Player)
-    ctx.fillStyle = "red";
-    ctx.fillRect(car.x, car.y, car.width, car.height);
-
-    // Desain Mobil (Kaca dan Ban)
-    ctx.fillStyle = "black"; // Ban
-    ctx.fillRect(car.x + 5, car.y + 65, 10, 10);
-    ctx.fillRect(car.x + 35, car.y + 65, 10, 10);
-
-    ctx.fillStyle = "lightblue"; // Kaca
-    ctx.fillRect(car.x + 10, car.y + 10, 30, 20);
-
-    ctx.fillStyle = "yellow"; // Lampu Depan
-    ctx.fillRect(car.x + 5, car.y, 10, 10);
-    ctx.fillRect(car.x + 35, car.y, 10, 10);
-
-    // Gambar Rintangan (Mobil Lawan)
-    obstacles.forEach(obs => {
-        ctx.fillStyle = "green";
-        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-
-        ctx.fillStyle = "black"; // Ban
-        ctx.fillRect(obs.x + 5, obs.y + 65, 10, 10);
-        ctx.fillRect(obs.x + 35, obs.y + 65, 10, 10);
-
-        ctx.fillStyle = "lightgray"; // Kaca
-        ctx.fillRect(obs.x + 10, obs.y + 10, 30, 20);
-
-        ctx.fillStyle = "yellow"; // Lampu Depan
-        ctx.fillRect(obs.x + 5, obs.y, 10, 10);
-        ctx.fillRect(obs.x + 35, obs.y, 10, 10);
-    });
-
-    // Tampilkan Skor
-    ctx.fillStyle = "white";
-    ctx.font = "18px Arial";
-    ctx.fillText(`Score: ${score}`, 20, 30);
-    ctx.fillText(`High Score: ${highScore}`, 20, 50);
-}
-
-// Loop Game
-function gameLoop() {
-    updateGame();
-    drawGame();
     requestAnimationFrame(gameLoop);
 }
 
+// Mulai permainan
+scoreDisplay.innerText = `Score: ${score}`;
+highScoreDisplay.innerText = `High Score: ${highScore}`;
 gameLoop();
