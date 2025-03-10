@@ -1,42 +1,60 @@
+/* Mengatur tampilan keseluruhan */
 body {
+    text-align: center;
     background-color: black;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
-    position: relative;
-}
-
-canvas {
-    border: 2px solid white;
-    background-color: gray;
-}
-
-.dev-text {
     color: white;
-    font-family: 'Courier New', monospace;
-    font-size: 20px;
-    margin-top: 10px;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
-/* Gaya untuk Tombol Kontrol Mobile */
+/* Judul Developer */
+h1 {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+/* Tampilan Canvas (Area Game) */
+canvas {
+    background-color: gray;
+    display: block;
+    margin: 10px auto;
+    border: 2px solid white;
+}
+
+/* Teks Score */
+p {
+    font-size: 18px;
+    margin: 5px;
+}
+
+/* Container untuk tombol kontrol */
 .controls {
     margin-top: 10px;
-    display: flex;
-    gap: 20px;
 }
 
+/* Tombol Kiri dan Kanan */
 button {
-    font-size: 30px;
-    padding: 10px 20px;
-    border: none;
-    background-color: white;
-    border-radius: 10px;
+    font-size: 24px;
+    padding: 10px;
+    margin: 5px;
     cursor: pointer;
+    background-color: white;
+    border: none;
+    border-radius: 5px;
+    width: 50px;
+    height: 50px;
 }
 
+/* Tombol diatur agar berada di tengah */
 button:active {
-    background-color: gray;
+    background-color: lightgray;
+}
+
+/* Tampilan Pop-up Game Over */
+.alert {
+    font-size: 20px;
+    font-weight: bold;
+    color: red;
 }
