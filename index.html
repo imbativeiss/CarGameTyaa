@@ -4,46 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Mobil Pixel</title>
-    <style>
-        body {
-            text-align: center;
-            background-color: black;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-        canvas {
-            background-color: gray;
-            display: block;
-            margin: auto;
-        }
-        .controls {
-            margin-top: 10px;
-        }
-        button {
-            font-size: 24px;
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            background-color: white;
-            color: black;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:active {
-            background-color: lightgray;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Dev: @imbativeiss</h1>
-    <canvas id="gameCanvas"></canvas>
-
-    <!-- Tombol Kontrol untuk Mobile -->
+    <canvas id="gameCanvas" width="300" height="400"></canvas>
+    <p>Score: <span id="score">0</span></p>
+    <p>High Score: <span id="highScore">0</span></p>
     <div class="controls">
-        <button id="leftBtn">◀</button>
-        <button id="rightBtn">▶</button>
+        <button id="leftBtn">⬅︎</button>
+        <button id="rightBtn">➡︎</button>
     </div>
-
     <script src="script.js"></script>
 </body>
-    </html>
+</html>
