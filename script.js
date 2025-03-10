@@ -1,99 +1,80 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-const roadWidth = 200;
-const laneWidth = roadWidth / 3;
-const playerSize = 30;
-const obstacleSize = 30;
-let playerX = canvas.width / 2 - playerSize / 2;
-let playerY = canvas.height - playerSize - 10;
+const roadWidth = canvas.width / 3;
+const playerWidth = 30;
+const playerHeight = 50;
+
+let player = { x: roadWidth, y: canvas.height - playerHeight - 10 };
 let obstacles = [];
+let speed = 2;
 let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
-let gameSpeed = 2;
-let isGameOver = false;
 
-document.getElementById("leftBtn").addEventListener("click", () => movePlayer(-1));
-document.getElementById("rightBtn").addEventListener("click", () => movePlayer(1));
-document.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowLeft") movePlayer(-1);
-    if (event.key === "ArrowRight") movePlayer(1);
+document.getElementById("highScore").innerText = highScore;
+
+function drawPlayer() {
+    ctx.fillStyle = "red";
+    ctx.fillRect(player.x, player.y, playerWidth, playerHeight);
+}
+
+function drawObstacles() {
+    ctx.fillStyle = "green";
+    obstacles.forEach(obs => ctx.fillRect(obs.x, obs.y, playerWidth, playerHeight));
+}
+
+function updateObstacles() {
+    obstacles.forEach(obs => obs.y += speed);
+    if (obstacles.length > 0 && obstacles[0].y > canvas.height) {
+        obstacles.shift();
+        score++;
+        document.getElementById("score").innerText = score;
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem("highScore", highScore);
+            document.getElementById("highScore").innerText = highScore;
+        }
+    }
+
+    if (Math.random() < 0.02) {
+        let randomLane = Math.floor(Math.random() * 3);
+        obstacles.push({ x: randomLane * roadWidth, y: -playerHeight });
+    }
+}
+
+function checkCollision() {
+    return obstacles.some(obs =>
+        obs.x < player.x + playerWidth &&
+        obs.x + playerWidth > player.x &&
+        obs.y < player.y + playerHeight &&
+        obs.y + playerHeight > player.y
+    );
+}
+
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawPlayer();
+    drawObstacles();
+    updateObstacles();
+
+    if (checkCollision()) {
+        alert(`Lu dah kalah, refresh kalo mau nantang game ini lagi PUH CUPUH!!!\n\nSkor: ${score}\nHigh Score: ${highScore}`);
+        document.location.reload();
+    } else {
+        requestAnimationFrame(gameLoop);
+    }
+}
+
+document.getElementById("leftBtn").addEventListener("click", () => {
+    if (player.x > 0) player.x -= roadWidth;
+});
+document.getElementById("rightBtn").addEventListener("click", () => {
+    if (player.x < canvas.width - roadWidth) player.x += roadWidth;
 });
 
-function movePlayer(direction) {
-    if (isGameOver) return;
-    let newX = playerX + direction * laneWidth;
-    if (newX >= canvas.width / 2 - roadWidth / 2 && newX <= canvas.width / 2 + roadWidth / 2 - playerSize) {
-        playerX = newX;
-    }
-}
+document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft" && player.x > 0) player.x -= roadWidth;
+    if (e.key === "ArrowRight" && player.x < canvas.width - roadWidth) player.x += roadWidth;
+});
 
-function spawnObstacle() {
-    const lanes = [
-        canvas.width / 2 - roadWidth / 2, // Kiri
-        canvas.width / 2 - playerSize / 2, // Tengah
-        canvas.width / 2 + roadWidth / 2 - playerSize // Kanan
-    ];
-    let randomLane = lanes[Math.floor(Math.random() * lanes.length)];
-    obstacles.push({ x: randomLane, y: -obstacleSize });
-}
-
-function updateGame() {
-    if (isGameOver) return;
-
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "gray";
-    ctx.fillRect(canvas.width / 2 - roadWidth / 2, 0, roadWidth, canvas.height);
-
-    ctx.strokeStyle = "white";
-    ctx.setLineDash([10, 10]);
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2, 0);
-    ctx.lineTo(canvas.width / 2, canvas.height);
-    ctx.stroke();
-
-    ctx.fillStyle = "red";
-    ctx.fillRect(playerX, playerY, playerSize, playerSize);
-
-    ctx.fillStyle = "green";
-    for (let i = 0; i < obstacles.length; i++) {
-        obstacles[i].y += gameSpeed;
-        ctx.fillRect(obstacles[i].x, obstacles[i].y, obstacleSize, obstacleSize);
-
-        if (obstacles[i].y > canvas.height) {
-            obstacles.splice(i, 1);
-            score++; // Tambah skor hanya saat melewati rintangan
-            gameSpeed += 0.05;
-        }
-
-        if (
-            obstacles[i] &&
-            playerX < obstacles[i].x + obstacleSize &&
-            playerX + playerSize > obstacles[i].x &&
-            playerY < obstacles[i].y + obstacleSize &&
-            playerY + playerSize > obstacles[i].y
-        ) {
-            isGameOver = true;
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem("highScore", highScore);
-            }
-            setTimeout(() => {
-                alert(`Lu dah kalah, refresh kalo mau nantang game ini lagi PUH CUPUH!!!\n\nGame Over! Skor: ${score}\nHigh Score: ${highScore}`);
-                location.reload();
-            }, 100);
-        }
-    }
-
-    ctx.fillStyle = "white";
-    ctx.font = "16px Arial";
-    ctx.fillText("Score: " + score, 20, 30);
-    ctx.fillText("High Score: " + highScore, 20, 50);
-
-    requestAnimationFrame(updateGame);
-}
-
-setInterval(spawnObstacle, 1500);
-updateGame();
+gameLoop();
