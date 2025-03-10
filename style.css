@@ -17,7 +17,7 @@ h1 {
 
 /* Tampilan Canvas (Area Game) */
 canvas {
-    background-color: gray;
+    background-color: #808080; /* Warna abu-abu untuk jalan */
     display: block;
     margin: 10px auto;
     border: 2px solid white;
@@ -27,6 +27,102 @@ canvas {
 p {
     font-size: 18px;
     margin: 5px;
+}
+
+/* Desain jalan */
+.road {
+    width: 100%;
+    height: 100%;
+    background: gray;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Garis tengah jalan */
+.lane-divider {
+    position: absolute;
+    width: 5px;
+    height: 100%;
+    background: white;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    animation: moveLane 1s linear infinite;
+}
+
+/* Animasi garis jalan bergerak ke bawah */
+@keyframes moveLane {
+    from {
+        top: -100%;
+    }
+    to {
+        top: 100%;
+    }
+}
+
+/* Mobil pemain */
+.car {
+    width: 40px;
+    height: 60px;
+    background: green;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 5px;
+}
+
+/* Detail mobil (lampu depan) */
+.car::before {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: yellow;
+    top: 5px;
+    left: 5px;
+    border-radius: 50%;
+}
+
+.car::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: yellow;
+    top: 5px;
+    right: 5px;
+    border-radius: 50%;
+}
+
+/* Rintangan (mobil lawan) */
+.obstacle {
+    width: 40px;
+    height: 60px;
+    background: red;
+    position: absolute;
+    top: 0;
+    border-radius: 5px;
+}
+
+/* Efek mobil lawan */
+.obstacle::before,
+.obstacle::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: black;
+    top: 5px;
+    border-radius: 50%;
+}
+
+.obstacle::before {
+    left: 5px;
+}
+
+.obstacle::after {
+    right: 5px;
 }
 
 /* Container untuk tombol kontrol */
