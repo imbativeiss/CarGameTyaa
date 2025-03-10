@@ -5,7 +5,7 @@ canvas.width = 300;
 canvas.height = 500;
 
 // Variabel Game
-let car = { x: 125, y: 400, width: 50, height: 80, speed: 5 };
+let car = { x: 125, y: 400, width: 50, height: 80, speed: 10 };
 let roadLines = [];
 let gameRunning = true;
 
@@ -14,10 +14,19 @@ for (let i = 0; i < 10; i++) {
     roadLines.push({ x: 145, y: i * 50, width: 10, height: 30 });
 }
 
-// Kontrol Mobil
+// Kontrol Keyboard
 document.addEventListener("keydown", function (event) {
-    if (event.key === "ArrowLeft" && car.x > 50) car.x -= car.speed;
-    if (event.key === "ArrowRight" && car.x < 200) car.x += car.speed;
+    if (event.key === "ArrowLeft" && car.x > 50) car.x -= car.speed;  // Kiri
+    if (event.key === "ArrowRight" && car.x < 200) car.x += car.speed; // Kanan
+});
+
+// Kontrol Tombol Virtual
+document.getElementById("leftBtn").addEventListener("click", () => {
+    if (car.x > 50) car.x -= car.speed;
+});
+
+document.getElementById("rightBtn").addEventListener("click", () => {
+    if (car.x < 200) car.x += car.speed;
 });
 
 // Fungsi Update Game
