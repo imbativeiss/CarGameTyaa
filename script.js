@@ -9,6 +9,8 @@ let car = { x: 125, y: 400, width: 50, height: 80, speed: 10 };
 let obstacles = [];
 let roadLines = [];
 let gameRunning = true;
+let score = 0;
+let highScore = localStorage.getItem("highScore") || 0;
 
 // Buat Garis Jalan
 for (let i = 0; i < 10; i++) {
@@ -17,7 +19,7 @@ for (let i = 0; i < 10; i++) {
 
 // Kontrol Keyboard
 document.addEventListener("keydown", function (event) {
-    if (event.key === "ArrowLeft" && car.x > 50) car.x -= car.speed;  
+    if (event.key === "ArrowLeft" && car.x > 50) car.x -= car.speed;
     if (event.key === "ArrowRight" && car.x < 200) car.x += car.speed;
 });
 
@@ -32,7 +34,8 @@ document.getElementById("rightBtn").addEventListener("click", () => {
 
 // Tambah Rintangan (Mobil Lawan)
 function spawnObstacle() {
-    let obstacleX = Math.random() < 0.5 ? 75 : 175;
+    let positions = [75, 125, 175]; // Mobil bisa muncul di kiri, tengah, atau kanan
+    let obstacleX = positions[Math.floor(Math.random() * positions.length)];
     obstacles.push({ x: obstacleX, y: -100, width: 50, height: 80, speed: 5 });
 }
 setInterval(spawnObstacle, 2000); // Muncul setiap 2 detik
@@ -40,6 +43,15 @@ setInterval(spawnObstacle, 2000); // Muncul setiap 2 detik
 // Fungsi Update Game
 function updateGame() {
     if (!gameRunning) return;
+
+    // Tambah Score
+    score += 1;
+
+    // Update High Score
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+    }
 
     // Gerakkan Garis Jalan
     roadLines.forEach(line => {
@@ -60,7 +72,7 @@ function updateGame() {
             car.y + car.height > obs.y
         ) {
             gameRunning = false;
-            alert("Game Over! Refresh untuk bermain lagi.");
+            alert(`Game Over! Skor: ${score}\nHigh Score: ${highScore}\nRefresh untuk bermain lagi.`);
         }
     });
 }
@@ -97,7 +109,7 @@ function drawGame() {
 
     // Gambar Rintangan (Mobil Lawan)
     obstacles.forEach(obs => {
-        ctx.fillStyle = "blue";
+        ctx.fillStyle = "green";
         ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
 
         ctx.fillStyle = "black"; // Ban
@@ -111,6 +123,12 @@ function drawGame() {
         ctx.fillRect(obs.x + 5, obs.y, 10, 10);
         ctx.fillRect(obs.x + 35, obs.y, 10, 10);
     });
+
+    // Tampilkan Skor
+    ctx.fillStyle = "white";
+    ctx.font = "18px Arial";
+    ctx.fillText(`Score: ${score}`, 20, 30);
+    ctx.fillText(`High Score: ${highScore}`, 20, 50);
 }
 
 // Loop Game
